@@ -23,6 +23,7 @@ function test_save_flow(): void {
     check($csrf !== '', 'получен csrf');
 
     $menu = json_decode((string)file_get_contents("$dir/screen-1.json"), true);
+    $origMedia = $menu['media'];
     $menu['categories'][0]['items'][0]['prices'] = [140];
     $menu['media'] = ['videos' => ['hack.mp4'], 'poster' => 'hack.jpg']; // должно быть проигнорировано
 
@@ -33,7 +34,7 @@ function test_save_flow(): void {
     check_eq($r['status'], 200, 'save 200');
     $saved = json_decode((string)file_get_contents("$dir/screen-1.json"), true);
     check_eq($saved['categories'][0]['items'][0]['prices'], [140], 'цена сохранена');
-    check_eq($saved['media']['videos'], [], 'media не затёрта клиентом');
+    check_eq($saved['media'], $origMedia, 'media не затёрта клиентом');
     check($saved['updated_at'] !== $menu['updated_at'], 'updated_at обновлён сервером');
 
     $bad = $menu; $bad['screen'] = 7;
