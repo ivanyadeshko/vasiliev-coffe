@@ -27,6 +27,7 @@ body { font-family: var(--body); color: var(--cream); }
 .vitrine video.on, .vitrine .poster.on { opacity: 1; }
 .vitrine video.top { z-index: 2; }
 .vitrine video.fade { transition: opacity .5s ease; }
+.vitrine video.fade-fast { transition: opacity .3s ease; }
 .vitrine .scrim { position: absolute; inset: 0; z-index: 3; }
 /* экран 1: широкая видеопанель слева, объект у левой трети,
    оба края мягко уходят в фон (справа — под текст) */

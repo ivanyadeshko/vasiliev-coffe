@@ -9,21 +9,19 @@
             {
                 "videos": [
                     "screen-1-a.mp4",
-                    "screen-1-d.mp4",
-                    "screen-1-d-rev.mp4"
+                    "screen-1-d.mp4"
                 ],
                 "intro": 1,
-                "loops": 3
+                "loops": 5
             },
             {
                 "videos": [
                     "screen-1-e1.mp4",
                     "screen-1-e2.mp4",
-                    "screen-1-f.mp4",
-                    "screen-1-f-rev.mp4"
+                    "screen-1-f.mp4"
                 ],
                 "intro": 2,
-                "loops": 2
+                "loops": 3
             }
         ]
     },

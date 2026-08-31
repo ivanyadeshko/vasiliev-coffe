@@ -59,7 +59,7 @@ window.MokkoPlayer = function (opts) {
             if (stopped) return;
             if (!ok) { showPoster(); return; }
             el.classList.add('top');
-            if (sceneChange && cur) el.classList.add('fade');
+            if (cur) el.classList.add(sceneChange ? 'fade' : 'fade-fast');
             var p = el.play();
             var reveal = function () {
                 if (stopped) return;
@@ -67,10 +67,10 @@ window.MokkoPlayer = function (opts) {
                 var old = cur;
                 cur = el;
                 var cleanup = function () {
-                    if (old) old.classList.remove('on', 'top', 'fade');
-                    el.classList.remove('top', 'fade');
+                    if (old) old.classList.remove('on', 'top', 'fade', 'fade-fast');
+                    el.classList.remove('top', 'fade', 'fade-fast');
                 };
-                setTimeout(cleanup, sceneChange ? 600 : 60);
+                setTimeout(cleanup, sceneChange ? 600 : 400);
                 // предзагрузка следующего клипа, пока играет текущий
                 var nx = computeNext(state);
                 var other = el === a ? b : a;
@@ -87,13 +87,12 @@ window.MokkoPlayer = function (opts) {
                     step(nx.sceneChange);
                 };
                 el.onended = trigger;
-                if (nx.sceneChange) {
-                    // смену сцены начинаем чуть раньше конца клипа:
-                    // новый фейдится поверх ещё ДВИЖУЩЕГОСЯ старого — без стоп-кадра
-                    el.ontimeupdate = function () {
-                        if (el.duration && el.duration - el.currentTime <= 0.6) trigger();
-                    };
-                }
+                // любой стык начинаем чуть раньше конца клипа: новый фейдится
+                // поверх ещё ДВИЖУЩЕГОСЯ старого — ни стоп-кадра, ни видимого шва
+                var early = nx.sceneChange ? 0.6 : 0.35;
+                el.ontimeupdate = function () {
+                    if (el.duration && el.duration - el.currentTime <= early) trigger();
+                };
             };
             if (p && p.then) p.then(reveal).catch(function () { showPoster(); });
             else reveal();
