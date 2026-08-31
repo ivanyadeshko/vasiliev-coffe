@@ -20,6 +20,7 @@ if ($id < 1 || $id > 4) { http_response_code(404); exit('нет такого э�
         <div class="scrim"></div>
     </div>
     <header class="tvhead">
+        <img class="logomark" src="/assets/img/logo.jpg" alt="" onerror="this.hidden=true">
         <span class="logo" id="brand">МОККО</span>
         <span class="scr" id="title"></span>
         <span class="clock" id="clock"></span>

@@ -2,34 +2,119 @@
     "screen": 2,
     "title": "Холодные напитки",
     "updated_at": "2026-08-31T12:00:00+03:00",
-    "media": { "videos": [], "poster": "" },
+    "media": {
+        "videos": [
+            "screen-2-a.mp4"
+        ],
+        "poster": "screen-2.jpg"
+    },
     "categories": [
         {
-            "id": "ice-coffee", "title": "Айс-кофе", "col": 1,
+            "id": "ice-coffee",
+            "title": "Айс-кофе",
+            "col": 1,
             "items": [
-                { "id": "bumble", "name": "Бамбл", "desc": "холодный кофе, апельсиновый сок, карамельный сироп", "volume": "", "prices": [null], "visible": true },
-                { "id": "espresso-tonic", "name": "Эспрессо тоник", "desc": "холодный кофе, тоник Rich Indian", "volume": "", "prices": [null], "visible": true },
-                { "id": "ice-latte", "name": "Айс латте", "desc": "эспрессо, лёд, холодное молоко", "volume": "", "prices": [null], "visible": true },
-                { "id": "frappe", "name": "Фраппе", "desc": "холодный кофе, молоко, мороженое, сироп: баунти, сникерс, шоколад, тирамису, попкорн, клубника", "volume": "", "prices": [null], "visible": true }
+                {
+                    "id": "bumble",
+                    "name": "Бамбл",
+                    "desc": "холодный кофе, апельсиновый сок, карамельный сироп",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "espresso-tonic",
+                    "name": "Эспрессо тоник",
+                    "desc": "холодный кофе, тоник Rich Indian",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "ice-latte",
+                    "name": "Айс латте",
+                    "desc": "эспрессо, лёд, холодное молоко",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "frappe",
+                    "name": "Фраппе",
+                    "desc": "холодный кофе, молоко, мороженое, сироп: баунти, сникерс, шоколад, тирамису, попкорн, клубника",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                }
             ]
         },
         {
-            "id": "bubble", "title": "Бабл-ти", "col": 1,
+            "id": "bubble",
+            "title": "Бабл-ти",
+            "col": 1,
             "items": [
-                { "id": "bubble-tea-milk", "name": "Бабл-ти молочный", "desc": "клубника, банан, дыня, лесные ягоды, черника", "volume": "", "prices": [null], "visible": true },
-                { "id": "bubble-lemonade", "name": "Бабл-лимонад", "desc": "лесные ягоды, голубая лагуна, чёрная смородина–мята, клубника–дыня, клубника–банан, манго–маракуйя", "volume": "", "prices": [null], "visible": true }
+                {
+                    "id": "bubble-tea-milk",
+                    "name": "Бабл-ти молочный",
+                    "desc": "клубника, банан, дыня, лесные ягоды, черника",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "bubble-lemonade",
+                    "name": "Бабл-лимонад",
+                    "desc": "лесные ягоды, голубая лагуна, чёрная смородина–мята, клубника–дыня, клубника–банан, манго–маракуйя",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                }
             ]
         },
         {
-            "id": "milkshakes", "title": "Милкшейки", "col": 2,
+            "id": "milkshakes",
+            "title": "Милкшейки",
+            "col": 2,
             "items": [
-                { "id": "milkshake", "name": "Милкшейк", "desc": "ваниль, орео, баунти, сникерс, шоколад, карамель, банан, лесные ягоды, арбуз, черника, клубника, дыня, бабл-гам", "volume": "", "prices": [null], "visible": true }
+                {
+                    "id": "milkshake",
+                    "name": "Милкшейк",
+                    "desc": "ваниль, орео, баунти, сникерс, шоколад, карамель, банан, лесные ягоды, арбуз, черника, клубника, дыня, бабл-гам",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                }
             ]
         },
         {
-            "id": "lemonades", "title": "Лимонады", "col": 2,
+            "id": "lemonades",
+            "title": "Лимонады",
+            "col": 2,
             "items": [
-                { "id": "lemonade", "name": "Лимонад", "desc": "мохито классический/клубничный, лесные ягоды, пина-колада, голубая лагуна, чёрная смородина–мята, клубника–дыня, клубника–банан, манго–маракуйя, гренадин с апельсиновым соком", "volume": "", "prices": [null], "visible": true }
+                {
+                    "id": "lemonade",
+                    "name": "Лимонад",
+                    "desc": "мохито классический\/клубничный, лесные ягоды, пина-колада, голубая лагуна, чёрная смородина–мята, клубника–дыня, клубника–банан, манго–маракуйя, гренадин с апельсиновым соком",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                }
             ]
         }
     ]

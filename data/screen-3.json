@@ -2,35 +2,172 @@
     "screen": 3,
     "title": "Завтраки",
     "updated_at": "2026-08-31T12:00:00+03:00",
-    "media": { "videos": [], "poster": "" },
+    "media": {
+        "videos": [
+            "screen-3-a.mp4"
+        ],
+        "poster": "screen-3.jpg"
+    },
     "categories": [
         {
-            "id": "sandwiches", "title": "Сэндвичи и круассаны", "col": 1,
+            "id": "sandwiches",
+            "title": "Сэндвичи и круассаны",
+            "col": 1,
             "items": [
-                { "id": "sandwich-ham", "name": "Сэндвич с ветчиной", "desc": "ветчина, сыр, томат, листья салата, белый соус", "volume": "", "prices": [null], "visible": true },
-                { "id": "sandwich-turkey", "name": "Сэндвич с индейкой", "desc": "индейка, бекон, томат, листья салата, белый соус", "volume": "", "prices": [null], "visible": true },
-                { "id": "croissant-chicken", "name": "Круассан с курицей", "desc": "копчёная курица, листья салата, малосольный огурец, томат, соус бургер", "volume": "", "prices": [null], "visible": true },
-                { "id": "croissant-salmon", "name": "Круассан с лососем", "desc": "лосось, творожный сыр, огурец, листья салата", "volume": "", "prices": [null], "visible": true }
+                {
+                    "id": "sandwich-ham",
+                    "name": "Сэндвич с ветчиной",
+                    "desc": "ветчина, сыр, томат, листья салата, белый соус",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "sandwich-turkey",
+                    "name": "Сэндвич с индейкой",
+                    "desc": "индейка, бекон, томат, листья салата, белый соус",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "croissant-chicken",
+                    "name": "Круассан с курицей",
+                    "desc": "копчёная курица, листья салата, малосольный огурец, томат, соус бургер",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "croissant-salmon",
+                    "name": "Круассан с лососем",
+                    "desc": "лосось, творожный сыр, огурец, листья салата",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                }
             ]
         },
         {
-            "id": "bowls", "title": "Боулы и салаты", "col": 1,
+            "id": "bowls",
+            "title": "Боулы и салаты",
+            "col": 1,
             "items": [
-                { "id": "bowl-fish", "name": "Боул с красной рыбой", "desc": "рис, красная рыба, яйцо, огурец, кукуруза, брокколи", "volume": "", "prices": [null], "visible": true },
-                { "id": "bowl-chicken", "name": "Боул с курицей", "desc": "рис, курица, томат, яйцо, авокадо, огурец", "volume": "", "prices": [null], "visible": true },
-                { "id": "caesar", "name": "Салат Цезарь", "desc": "пекинская капуста, томат, курица, сухарики, сыр, соус цезарь", "volume": "", "prices": [null], "visible": true }
+                {
+                    "id": "bowl-fish",
+                    "name": "Боул с красной рыбой",
+                    "desc": "рис, красная рыба, яйцо, огурец, кукуруза, брокколи",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "bowl-chicken",
+                    "name": "Боул с курицей",
+                    "desc": "рис, курица, томат, яйцо, авокадо, огурец",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "caesar",
+                    "name": "Салат Цезарь",
+                    "desc": "пекинская капуста, томат, курица, сухарики, сыр, соус цезарь",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                }
             ]
         },
         {
-            "id": "hot-breakfast", "title": "Горячие завтраки", "col": 2,
+            "id": "hot-breakfast",
+            "title": "Горячие завтраки",
+            "col": 2,
             "items": [
-                { "id": "syrniki", "name": "Сырники", "desc": "", "volume": "", "prices": [null], "visible": true },
-                { "id": "oladi", "name": "Оладьи", "desc": "", "volume": "", "prices": [null], "visible": true },
-                { "id": "kasha-banan", "name": "Каша овсяная с бананом и мёдом", "desc": "на молоке", "volume": "", "prices": [null], "visible": true },
-                { "id": "kasha-avocado", "name": "Каша овсяная с сыром и авокадо", "desc": "на молоке", "volume": "", "prices": [null], "visible": true },
-                { "id": "english-breakfast", "name": "Английский завтрак", "desc": "яйца 2 шт., сосиска, бекон, томат, листья салата, хрустящий хлеб", "volume": "", "prices": [null], "visible": true },
-                { "id": "omlet", "name": "Омлет", "desc": "ветчина, сыр, авокадо, томат", "volume": "", "prices": [null], "visible": true },
-                { "id": "blinchiki", "name": "Блинчики", "desc": "ветчина, сыр", "volume": "", "prices": [null], "visible": true }
+                {
+                    "id": "syrniki",
+                    "name": "Сырники",
+                    "desc": "",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "oladi",
+                    "name": "Оладьи",
+                    "desc": "",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "kasha-banan",
+                    "name": "Каша овсяная с бананом и мёдом",
+                    "desc": "на молоке",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "kasha-avocado",
+                    "name": "Каша овсяная с сыром и авокадо",
+                    "desc": "на молоке",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "english-breakfast",
+                    "name": "Английский завтрак",
+                    "desc": "яйца 2 шт., сосиска, бекон, томат, листья салата, хрустящий хлеб",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "omlet",
+                    "name": "Омлет",
+                    "desc": "ветчина, сыр, авокадо, томат",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                },
+                {
+                    "id": "blinchiki",
+                    "name": "Блинчики",
+                    "desc": "ветчина, сыр",
+                    "volume": "",
+                    "prices": [
+                        null
+                    ],
+                    "visible": true
+                }
             ]
         }
     ]
