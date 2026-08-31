@@ -81,20 +81,85 @@
         player.start();
     }
 
+    var etag = null;
+    var pollTimer = null;
+    var startedAt = Date.now();
+
+    function signature(payload) {
+        return JSON.stringify(payload.menu.categories.map(function (c) {
+            return [c.id, c.title, c.col, c.items.filter(function (i) { return i.visible; })
+                .map(function (i) { return [i.id, i.name, i.desc, i.volume]; })];
+        }));
+    }
+
+    function updatePrices(payload) {
+        payload.menu.categories.forEach(function (c) {
+            c.items.forEach(function (it) {
+                if (!it.visible) return;
+                var el = menuEl.querySelector('.pr[data-item-id="' + it.id + '"]');
+                var txt = priceText(it.prices);
+                if (el && el.textContent !== txt) {
+                    el.style.opacity = '0';
+                    setTimeout(function () {
+                        el.textContent = txt;
+                        el.style.opacity = '1';
+                        el.classList.remove('flash');
+                        void el.offsetWidth;
+                        el.classList.add('flash');
+                    }, 400);
+                }
+            });
+        });
+    }
+
     function applyPayload(payload) {
-        render(payload);
+        if (current && signature(current) === signature(payload)) {
+            updatePrices(payload);
+        } else {
+            render(payload);
+            if (current) {
+                menuEl.classList.remove('swap');
+                void menuEl.offsetWidth;
+                menuEl.classList.add('swap');
+            }
+        }
         current = payload;
         setupMedia(payload);
         try { localStorage.setItem(CACHE_KEY, JSON.stringify(payload)); } catch (e) {}
     }
 
-    fetch('/api/menu.php?screen=' + screenId, { cache: 'no-store' })
-        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then(applyPayload)
-        .catch(function () {
-            try {
-                var cached = localStorage.getItem(CACHE_KEY);
-                if (cached) applyPayload(JSON.parse(cached));
-            } catch (e) {}
-        });
+    function schedule() {
+        var sec = (current && current.settings.poll_seconds) || 60;
+        clearTimeout(pollTimer);
+        pollTimer = setTimeout(poll, sec * 1000);
+    }
+
+    function poll() {
+        var headers = etag ? { 'If-None-Match': etag } : {};
+        fetch('/api/menu.php?screen=' + screenId, { headers: headers, cache: 'no-store' })
+            .then(function (r) {
+                if (r.status === 304) return null;
+                if (!r.ok) throw new Error(r.status);
+                etag = r.headers.get('ETag');
+                return r.json();
+            })
+            .then(function (payload) { if (payload) applyPayload(payload); })
+            .catch(function () {
+                if (!current) {
+                    try {
+                        var cached = localStorage.getItem(CACHE_KEY);
+                        if (cached) applyPayload(JSON.parse(cached));
+                    } catch (e) {}
+                }
+            })
+            .then(schedule);
+    }
+    poll();
+
+    setInterval(function () {
+        if (!current) return;
+        var d = new Date();
+        var hm = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+        if (hm === current.settings.reload_at && Date.now() - startedAt > 120000) location.reload();
+    }, 60000);
 })();
