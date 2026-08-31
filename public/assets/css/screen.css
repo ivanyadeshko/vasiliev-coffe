@@ -15,7 +15,9 @@ body { font-family: var(--body); color: var(--cream); }
     transform-origin: 0 0; background: var(--bg0); overflow: hidden; }
 
 /* ---- витрина (видеофон) ---- */
-.vitrine { position: absolute; inset: 0; background:
+/* isolation: z-index видео и скрима живут внутри витрины
+   и никогда не всплывают над шапкой и текстом меню */
+.vitrine { position: absolute; inset: 0; isolation: isolate; background:
     radial-gradient(90% 70% at 18% 88%, rgba(233, 162, 59, .28), rgba(233, 162, 59, 0) 60%),
     radial-gradient(70% 55% at 30% 60%, rgba(120, 72, 30, .30), rgba(120, 72, 30, 0) 70%),
     linear-gradient(160deg, #1a120c 0%, #120D0A 70%); }
