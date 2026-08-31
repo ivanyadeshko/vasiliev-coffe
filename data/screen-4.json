@@ -1,0 +1,39 @@
+{
+    "screen": 4,
+    "title": "Фастфуд и десерты",
+    "updated_at": "2026-08-31T12:00:00+03:00",
+    "media": { "videos": [], "poster": "" },
+    "categories": [
+        {
+            "id": "shaurma", "title": "Шаурмикс", "col": 1,
+            "items": [
+                { "id": "shaurma-classic", "name": "Классическая", "desc": "пекинская капуста, курица, красный лук, томат, огурец, томатный и чесночный соусы", "volume": "", "prices": [null], "visible": true },
+                { "id": "shaurma-bbq", "name": "Барбекю", "desc": "пекинская капуста, курица, красный лук, томат, огурец, чесночный соус и барбекю", "volume": "", "prices": [null], "visible": true },
+                { "id": "shaurma-spicy", "name": "Пикантная", "desc": "пекинская капуста, курица, красный лук, морковь по-корейски, томат, огурец, чесночный и карри соусы", "volume": "", "prices": [null], "visible": true },
+                { "id": "shaurma-jalapeno", "name": "Халапеньо", "desc": "пекинская капуста, курица, красный лук, томат, перец халапеньо, томатный и чесночный соусы", "volume": "", "prices": [null], "visible": true },
+                { "id": "shaurma-cheese", "name": "Сырная", "desc": "пекинская капуста, курица, красный лук, томат, огурец, моцарелла, томатный и чесночный соусы", "volume": "", "prices": [null], "visible": true },
+                { "id": "shaurma-big-tasty", "name": "Биг тейсти", "desc": "пекинская капуста, курица, красный лук, томат, картофель фри, соус гриль-тейсти", "volume": "", "prices": [null], "visible": true }
+            ]
+        },
+        {
+            "id": "snacks", "title": "Закуски и хот-доги", "col": 2,
+            "items": [
+                { "id": "fries", "name": "Картофель фри", "desc": "", "volume": "", "prices": [null], "visible": true },
+                { "id": "nuggets", "name": "Наггетсы", "desc": "", "volume": "", "prices": [null], "visible": true },
+                { "id": "hotdog-french", "name": "Хот-дог французский", "desc": "закрытая булочка, сосиска, томатный и горчичный соусы", "volume": "", "prices": [null], "visible": true },
+                { "id": "hotdog-danish", "name": "Хот-дог датский", "desc": "открытая булочка, сосиска, малосольный огурец, жареный лук, томатный и горчичный соусы", "volume": "", "prices": [null], "visible": true }
+            ]
+        },
+        {
+            "id": "desserts", "title": "Десерты", "col": 2,
+            "items": [
+                { "id": "ekler", "name": "Эклер", "desc": "", "volume": "", "prices": [null], "visible": true },
+                { "id": "donuts", "name": "Донаты", "desc": "", "volume": "", "prices": [null], "visible": true },
+                { "id": "cheesecake", "name": "Чизкейк в асс.", "desc": "", "volume": "", "prices": [null], "visible": true },
+                { "id": "tort", "name": "Торт в асс.", "desc": "", "volume": "", "prices": [null], "visible": true },
+                { "id": "trubochki", "name": "Трубочки", "desc": "", "volume": "", "prices": [null], "visible": true },
+                { "id": "oreshki", "name": "Орешки", "desc": "", "volume": "", "prices": [null], "visible": true }
+            ]
+        }
+    ]
+}

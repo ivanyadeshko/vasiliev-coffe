@@ -1,0 +1,38 @@
+{
+    "screen": 1,
+    "title": "Горячие напитки",
+    "updated_at": "2026-08-31T12:00:00+03:00",
+    "media": { "videos": [], "poster": "" },
+    "categories": [
+        {
+            "id": "classic", "title": "Классический кофе", "col": 1,
+            "items": [
+                { "id": "espresso", "name": "Эспрессо", "desc": "", "volume": "40 мл", "prices": [null], "visible": true },
+                { "id": "americano", "name": "Американо", "desc": "", "volume": "250 мл", "prices": [null], "visible": true },
+                { "id": "latte", "name": "Латте", "desc": "", "volume": "350/450 мл", "prices": [null, null], "visible": true },
+                { "id": "cappuccino", "name": "Капучино", "desc": "", "volume": "350/450 мл", "prices": [null, null], "visible": true },
+                { "id": "flat-white", "name": "Флэт Уайт", "desc": "", "volume": "350 мл", "prices": [null], "visible": true },
+                { "id": "raf", "name": "Раф", "desc": "", "volume": "350/450 мл", "prices": [null, null], "visible": true },
+                { "id": "mokko", "name": "Мокко", "desc": "", "volume": "350/450 мл", "prices": [null, null], "visible": true }
+            ]
+        },
+        {
+            "id": "tea-cocoa", "title": "Чай и какао", "col": 1,
+            "items": [
+                { "id": "tea", "name": "Чай", "desc": "", "volume": "", "prices": [null], "visible": true },
+                { "id": "hot-chocolate", "name": "Горячий шоколад", "desc": "", "volume": "", "prices": [null], "visible": true }
+            ]
+        },
+        {
+            "id": "author", "title": "Авторский кофе", "col": 2,
+            "items": [
+                { "id": "raf-syrny", "name": "Раф сырный", "desc": "со сливочным сыром", "volume": "", "prices": [null], "visible": true },
+                { "id": "raf-popcorn", "name": "Раф попкорн", "desc": "солёная карамель, попкорн", "volume": "", "prices": [null], "visible": true },
+                { "id": "snickers", "name": "Сникерс", "desc": "арахис, ореховый и карамельный сиропы", "volume": "", "prices": [null], "visible": true },
+                { "id": "bounty", "name": "Баунти", "desc": "кокосовый сироп, кокосовая стружка, шоколадный топпинг", "volume": "", "prices": [null], "visible": true },
+                { "id": "mokko-shokoladny", "name": "Мокко шоколадный", "desc": "шоколадный сироп, тёртый шоколад", "volume": "", "prices": [null], "visible": true },
+                { "id": "mokko-oreo", "name": "Мокко Орео", "desc": "с печеньем Орео", "volume": "", "prices": [null], "visible": true }
+            ]
+        }
+    ]
+}
