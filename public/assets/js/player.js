@@ -2,10 +2,12 @@ window.MokkoPlayer = function (opts) {
     'use strict';
     var vids = opts.videos || [];
     var a = opts.a, b = opts.b, posterEl = opts.posterEl;
-    var idx = 0, active = null, switching = false, stopped = false;
+    var hold = (opts.holdSeconds == null ? 15 : opts.holdSeconds) * 1000;
+    var idx = 0, active = null, stopped = false, holdTimer = null;
 
     function showPoster() {
         stopped = true;
+        clearTimeout(holdTimer);
         if (opts.poster) posterEl.style.backgroundImage = 'url(' + opts.poster + ')';
         posterEl.classList.add('on');
         a.classList.remove('on');
@@ -19,12 +21,10 @@ window.MokkoPlayer = function (opts) {
         el.classList.add('on');
         other.classList.remove('on');
         active = el;
-        switching = false;
     }
 
     function playNext() {
         if (stopped) return;
-        switching = true;
         var el = active === a ? b : a;
         var src = vids[idx % vids.length];
         idx++;
@@ -40,26 +40,26 @@ window.MokkoPlayer = function (opts) {
             if (p && p.catch) p.then(function () { swapTo(el); }).catch(fail);
             else swapTo(el);
         };
-        el.onended = function () { if (!switching && !stopped) playNext(); };
+        // ролик доигрывает до конца, замирает на финальном кадре,
+        // держит паузу и только потом кроссфейдится в следующий
+        el.onended = function () {
+            if (stopped) return;
+            clearTimeout(holdTimer);
+            holdTimer = setTimeout(playNext, hold);
+        };
         el.src = src;
         el.load();
-    }
-
-    function tick() {
-        if (stopped || !active || switching) return;
-        if (active.duration && active.duration - active.currentTime < 1.2) playNext();
     }
 
     return {
         start: function () {
             if (!vids.length) { showPoster(); return; }
-            [a, b].forEach(function (el) { el.addEventListener('timeupdate', tick); });
             playNext();
         },
         stop: function () {
             stopped = true;
+            clearTimeout(holdTimer);
             [a, b].forEach(function (el) {
-                el.removeEventListener('timeupdate', tick);
                 el.pause();
                 el.removeAttribute('src');
             });
