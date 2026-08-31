@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/../../lib/storage.php';
-require __DIR__ . '/../../lib/auth.php';
-require __DIR__ . '/../../lib/validate.php';
+require_once __DIR__ . '/../../lib/storage.php';
+require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../lib/validate.php';
 
 header('Content-Type: application/json; charset=utf-8');
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') { http_response_code(405); echo '{"error":"только POST"}'; exit; }
