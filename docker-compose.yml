@@ -1,0 +1,11 @@
+services:
+  web:
+    image: php:8.3-apache
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./lib:/var/www/lib
+      - ./data:/var/www/data
+      - ./tests:/var/www/tests
+      - ./bin:/var/www/bin
