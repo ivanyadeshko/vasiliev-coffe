@@ -14,6 +14,16 @@
                 ],
                 "intro": 1,
                 "loops": 3
+            },
+            {
+                "videos": [
+                    "screen-1-e1.mp4",
+                    "screen-1-e2.mp4",
+                    "screen-1-f.mp4",
+                    "screen-1-f-rev.mp4"
+                ],
+                "intro": 2,
+                "loops": 2
             }
         ]
     },
