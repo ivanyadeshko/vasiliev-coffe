@@ -3,13 +3,29 @@
     "title": "Холодные напитки",
     "updated_at": "2026-08-31T12:00:00+03:00",
     "media": {
-        "videos": [
-            "screen-2-a.mp4",
-            "screen-2-b.mp4",
-            "screen-2-c.mp4"
-        ],
+        "videos": [],
         "poster": "screen-2.jpg",
-        "last_loops": 5
+        "scenes": [
+            {
+                "videos": [
+                    "screen-2-a1.mp4",
+                    "screen-2-a2.mp4",
+                    "screen-2-al.mp4"
+                ],
+                "intro": 2,
+                "loops": 3
+            },
+            {
+                "videos": [
+                    "screen-2-b1.mp4",
+                    "screen-2-b2.mp4",
+                    "screen-2-bl.mp4",
+                    "screen-2-bl-rev.mp4"
+                ],
+                "intro": 2,
+                "loops": 2
+            }
+        ]
     },
     "categories": [
         {

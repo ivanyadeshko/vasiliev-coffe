@@ -3,13 +3,27 @@
     "title": "Фастфуд и десерты",
     "updated_at": "2026-08-31T12:00:00+03:00",
     "media": {
-        "videos": [
-            "screen-4-a.mp4",
-            "screen-4-b.mp4",
-            "screen-4-c.mp4"
-        ],
+        "videos": [],
         "poster": "screen-4.jpg",
-        "last_loops": 5
+        "scenes": [
+            {
+                "videos": [
+                    "screen-4-a1.mp4",
+                    "screen-4-al.mp4",
+                    "screen-4-al-rev.mp4"
+                ],
+                "intro": 1,
+                "loops": 3
+            },
+            {
+                "videos": [
+                    "screen-4-b1.mp4",
+                    "screen-4-bl.mp4"
+                ],
+                "intro": 1,
+                "loops": 5
+            }
+        ]
     },
     "categories": [
         {
