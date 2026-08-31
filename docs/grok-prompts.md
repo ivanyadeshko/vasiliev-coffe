@@ -166,6 +166,43 @@ powder falling like snow, seamless loop + стилевой якорь
 
 ---
 
+## Логотип «МОККО»
+
+Стратегия: Grok генерирует только **эмблему без текста** — слово «МОККО»
+мы всегда набираем шрифтом Unbounded 700 рядом с эмблемой (генеративные
+модели ненадёжно рисуют кириллицу: «МОККО» превратится в кашу из букв).
+Эмблему просим на тёмном фоне в акцентном янтаре, плоскую, простую —
+она должна читаться в шапке экрана высотой ~56 px.
+
+**Вариант 1 — чашка сверху, пар буквой «М» (основной):**
+```
+Minimalist flat vector logo emblem for a coffee shop: a round coffee cup
+seen from above, rising steam subtly forming the letter "M", clean
+geometric lines, warm amber color #E9A23B on deep espresso brown #120D0A
+background, lots of negative space, centered, no text, no letters,
+no watermark, simple enough to stay readable at small size
+```
+
+**Вариант 2 — чашка сбоку с плавным паром:**
+```
+Minimalist flat vector logo emblem: a simple coffee cup in side view with
+one elegant swirl of steam, thin uniform line weight, warm amber #E9A23B
+on deep espresso brown #120D0A, geometric, modern, centered, no text,
+no letters, no watermark
+```
+
+**Вариант 3 — зерно + капля:**
+```
+Minimalist flat vector logo emblem: a coffee bean merged with a drop
+shape, single continuous line style, warm amber #E9A23B on deep espresso
+brown #120D0A background, modern geometric mark, centered, no text,
+no letters, no watermark
+```
+
+Отбор: эмблема должна оставаться узнаваемой при высоте 56 px; никаких
+градиентов и мелких деталей. Итоговый файл: PNG с прозрачным фоном
+(фон удалим при подготовке ассетов), высота ≥ 512 px.
+
 ## Технические требования к результату
 
 | Параметр | Значение |
