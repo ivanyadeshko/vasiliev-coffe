@@ -20,7 +20,12 @@ function http(string $method, string $url, array $opts = []): array {
 }
 
 function start_server(string $dataDir): array {
-    $port = 8901 + random_int(0, 90);
+    // свободный порт: иначе два тестовых сервера в одном прогоне могут столкнуться
+    do {
+        $port = 8901 + random_int(0, 900);
+        $busy = @fsockopen('127.0.0.1', $port, $ec, $em, 0.05);
+        if ($busy) fclose($busy);
+    } while ($busy);
     $cmd = 'MOKKO_DATA_DIR=' . escapeshellarg($dataDir) . ' php -S 127.0.0.1:' . $port . ' -t /var/www/html';
     $proc = proc_open($cmd, [1 => ['file', '/dev/null', 'w'], 2 => ['file', '/dev/null', 'w']], $pipes);
     for ($i = 0; $i < 50; $i++) {
