@@ -2,12 +2,14 @@ window.MokkoPlayer = function (opts) {
     'use strict';
     var vids = opts.videos || [];
     var a = opts.a, b = opts.b, posterEl = opts.posterEl;
-    var hold = (opts.holdSeconds == null ? 15 : opts.holdSeconds) * 1000;
-    var idx = 0, active = null, stopped = false, holdTimer = null;
+    // последний клип плейлиста (обычно зацикленное испарение) повторяется
+    // lastLoops раз с кроссфейдом, затем плейлист начинается заново;
+    // 0 = последний клип крутится бесконечно
+    var lastLoops = opts.lastLoops == null ? 5 : opts.lastLoops;
+    var idx = 0, repeats = 0, active = null, stopped = false;
 
     function showPoster() {
         stopped = true;
-        clearTimeout(holdTimer);
         if (opts.poster) posterEl.style.backgroundImage = 'url(' + opts.poster + ')';
         posterEl.classList.add('on');
         a.classList.remove('on');
@@ -23,11 +25,16 @@ window.MokkoPlayer = function (opts) {
         active = el;
     }
 
-    function playNext() {
+    function advance() {
+        if (idx < vids.length - 1) { idx++; return; }
+        repeats++;
+        if (lastLoops !== 0 && repeats >= lastLoops) { idx = 0; repeats = 0; }
+    }
+
+    function playCurrent() {
         if (stopped) return;
         var el = active === a ? b : a;
-        var src = vids[idx % vids.length];
-        idx++;
+        var src = vids[idx];
         var done = false;
         var fail = function () { if (!done) { done = true; showPoster(); } };
         var t = setTimeout(fail, 4000);
@@ -40,12 +47,10 @@ window.MokkoPlayer = function (opts) {
             if (p && p.catch) p.then(function () { swapTo(el); }).catch(fail);
             else swapTo(el);
         };
-        // ролик доигрывает до конца, замирает на финальном кадре,
-        // держит паузу и только потом кроссфейдится в следующий
         el.onended = function () {
             if (stopped) return;
-            clearTimeout(holdTimer);
-            holdTimer = setTimeout(playNext, hold);
+            advance();
+            playCurrent();
         };
         el.src = src;
         el.load();
@@ -54,11 +59,10 @@ window.MokkoPlayer = function (opts) {
     return {
         start: function () {
             if (!vids.length) { showPoster(); return; }
-            playNext();
+            playCurrent();
         },
         stop: function () {
             stopped = true;
-            clearTimeout(holdTimer);
             [a, b].forEach(function (el) {
                 el.pause();
                 el.removeAttribute('src');

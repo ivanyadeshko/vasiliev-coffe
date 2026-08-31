@@ -5,11 +5,10 @@
     "media": {
         "videos": [
             "screen-1-a.mp4",
-            "screen-1-b.mp4",
-            "screen-1-c.mp4"
+            "screen-1-d.mp4"
         ],
         "poster": "screen-1.jpg",
-        "hold_seconds": 12
+        "last_loops": 5
     },
     "categories": [
         {

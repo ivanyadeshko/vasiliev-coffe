@@ -73,7 +73,7 @@
         if (player) player.stop();
         player = window.MokkoPlayer({
             videos: (m.videos || []).map(function (v) { return '/assets/video/' + v; }),
-            holdSeconds: m.hold_seconds,
+            lastLoops: m.last_loops,
             poster: m.poster ? '/assets/img/' + m.poster : '',
             a: document.getElementById('vid-a'),
             b: document.getElementById('vid-b'),

@@ -23,10 +23,16 @@ body { font-family: var(--body); color: var(--cream); }
     object-fit: cover; opacity: 0; transition: opacity 1s ease; background-size: cover; background-position: center; }
 .vitrine video.on, .vitrine .poster.on { opacity: 1; }
 .vitrine .scrim { position: absolute; inset: 0; }
-/* экран 1: видео — панель в левой трети, не фон под текстом */
-body[data-screen="1"] .vitrine { inset: 0 auto 0 0; width: 33.33%; }
+/* экран 1: широкая видеопанель слева, объект у левой трети,
+   оба края мягко уходят в фон (справа — под текст) */
+body[data-screen="1"] .vitrine { inset: 0 auto 0 0; width: 66.67%; }
+body[data-screen="1"] .vitrine video,
+body[data-screen="1"] .vitrine .poster { object-position: 100% 50%; background-position: 100% 50%; }
 body[data-screen="1"] .scrim { background:
-    linear-gradient(90deg, rgba(18,13,10,0) 62%, rgba(18,13,10,.96) 100%); }
+    linear-gradient(90deg,
+        rgba(18,13,10,.94) 0%, rgba(18,13,10,0) 18%,
+        rgba(18,13,10,0) 34%, rgba(18,13,10,.9) 58%,
+        rgba(18,13,10,.97) 100%); }
 body[data-screen="2"] .scrim { background:
     linear-gradient(90deg, rgba(18,13,10,.05) 0%, rgba(18,13,10,.58) 36%, rgba(18,13,10,.94) 46%, rgba(18,13,10,.97) 100%); }
 body[data-screen="3"] .scrim, body[data-screen="4"] .scrim { background:
