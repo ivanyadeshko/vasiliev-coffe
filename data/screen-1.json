@@ -3,12 +3,19 @@
     "title": "Горячие напитки",
     "updated_at": "2026-08-31T13:45:32+00:00",
     "media": {
-        "videos": [
-            "screen-1-a.mp4",
-            "screen-1-d.mp4"
-        ],
+        "videos": [],
         "poster": "screen-1.jpg",
-        "last_loops": 5
+        "scenes": [
+            {
+                "videos": [
+                    "screen-1-a.mp4",
+                    "screen-1-d.mp4",
+                    "screen-1-d-rev.mp4"
+                ],
+                "intro": 1,
+                "loops": 3
+            }
+        ]
     },
     "categories": [
         {

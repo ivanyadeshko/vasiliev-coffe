@@ -71,9 +71,22 @@
         if (key === mediaKey) return;
         mediaKey = key;
         if (player) player.stop();
+        var toUrl = function (v) { return '/assets/video/' + v; };
+        var scenes;
+        if (m.scenes && m.scenes.length) {
+            scenes = m.scenes.map(function (s) {
+                return { videos: (s.videos || []).map(toUrl),
+                         intro: s.intro || 0,
+                         loops: s.loops == null ? 5 : s.loops };
+            });
+        } else {
+            // легаси: список клипов = одна сцена, последний клип цикловой
+            var vs = (m.videos || []).map(toUrl);
+            scenes = vs.length ? [{ videos: vs, intro: vs.length - 1,
+                loops: m.last_loops == null ? 5 : m.last_loops }] : [];
+        }
         player = window.MokkoPlayer({
-            videos: (m.videos || []).map(function (v) { return '/assets/video/' + v; }),
-            lastLoops: m.last_loops,
+            scenes: scenes,
             poster: m.poster ? '/assets/img/' + m.poster : '',
             a: document.getElementById('vid-a'),
             b: document.getElementById('vid-b'),

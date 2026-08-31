@@ -1,12 +1,13 @@
 window.MokkoPlayer = function (opts) {
     'use strict';
-    var vids = opts.videos || [];
+    // Сцена: {videos: [url...], intro: n, loops: k}
+    //  - клипы 0..intro-1 играют один раз (сюжет),
+    //  - клипы intro..конец — цикловая часть (обычно пар вперёд/назад:
+    //    стыки совпадают покадрово, скачков нет), k полных проходов
+    //    (0 = бесконечно), затем плавный переход к следующей сцене.
+    var scenes = opts.scenes || [];
     var a = opts.a, b = opts.b, posterEl = opts.posterEl;
-    // последний клип плейлиста (обычно зацикленное испарение) повторяется
-    // lastLoops раз с кроссфейдом, затем плейлист начинается заново;
-    // 0 = последний клип крутится бесконечно
-    var lastLoops = opts.lastLoops == null ? 5 : opts.lastLoops;
-    var idx = 0, repeats = 0, active = null, stopped = false;
+    var si = 0, ci = 0, passes = 0, active = null, stopped = false;
 
     function showPoster() {
         stopped = true;
@@ -25,16 +26,25 @@ window.MokkoPlayer = function (opts) {
         active = el;
     }
 
+    function nextScene() {
+        si = (si + 1) % scenes.length;
+        ci = 0;
+        passes = 0;
+    }
+
     function advance() {
-        if (idx < vids.length - 1) { idx++; return; }
-        repeats++;
-        if (lastLoops !== 0 && repeats >= lastLoops) { idx = 0; repeats = 0; }
+        var sc = scenes[si];
+        if (ci < sc.videos.length - 1) { ci++; return; }
+        if (sc.intro >= sc.videos.length) { nextScene(); return; } // цикла нет
+        passes++;
+        if (sc.loops !== 0 && passes >= sc.loops) nextScene();
+        else ci = sc.intro;
     }
 
     function playCurrent() {
         if (stopped) return;
         var el = active === a ? b : a;
-        var src = vids[idx];
+        var src = scenes[si].videos[ci];
         var done = false;
         var fail = function () { if (!done) { done = true; showPoster(); } };
         var t = setTimeout(fail, 4000);
@@ -58,7 +68,8 @@ window.MokkoPlayer = function (opts) {
 
     return {
         start: function () {
-            if (!vids.length) { showPoster(); return; }
+            var ok = scenes.some(function (s) { return s.videos.length > 0; });
+            if (!ok) { showPoster(); return; }
             playCurrent();
         },
         stop: function () {
