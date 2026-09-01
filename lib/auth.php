@@ -31,6 +31,57 @@ function try_login(string $password): bool {
     sleep(1);
     return false;
 }
+function client_ip(): string {
+    // за nginx реальный адрес приходит в X-Real-IP (порт контейнера закрыт снаружи)
+    return $_SERVER['HTTP_X_REAL_IP'] ?? ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+}
+
+/**
+ * Регистрирует попытку входа с IP. Не больше $limit попыток за $window секунд.
+ * Возвращает [разрешено(bool), секунд до снятия блокировки(int)].
+ */
+function login_rate_register(string $ip, int $limit = 4, int $window = 600): array {
+    $path = data_dir() . '/login-attempts.json';
+    $now = time();
+    $fh = fopen($path, 'c+');
+    if ($fh === false) return [true, 0]; // не блокируем вход из-за ошибки ФС
+    flock($fh, LOCK_EX);
+    $all = json_decode((string)stream_get_contents($fh), true) ?: [];
+    foreach ($all as $k => $ts) {
+        $all[$k] = array_values(array_filter((array)$ts, fn($t) => $t > $now - $window));
+        if ($all[$k] === []) unset($all[$k]);
+    }
+    $times = $all[$ip] ?? [];
+    if (count($times) >= $limit) {
+        flock($fh, LOCK_UN);
+        fclose($fh);
+        return [false, max(1, min($times) + $window - $now)];
+    }
+    $all[$ip][] = $now;
+    ftruncate($fh, 0);
+    rewind($fh);
+    fwrite($fh, json_encode($all));
+    fflush($fh);
+    flock($fh, LOCK_UN);
+    fclose($fh);
+    return [true, 0];
+}
+
+function login_rate_clear(string $ip): void {
+    $path = data_dir() . '/login-attempts.json';
+    $fh = @fopen($path, 'c+');
+    if ($fh === false) return;
+    flock($fh, LOCK_EX);
+    $all = json_decode((string)stream_get_contents($fh), true) ?: [];
+    unset($all[$ip]);
+    ftruncate($fh, 0);
+    rewind($fh);
+    fwrite($fh, json_encode($all));
+    fflush($fh);
+    flock($fh, LOCK_UN);
+    fclose($fh);
+}
+
 function csrf_token(): string {
     auth_boot();
     if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(16));

@@ -5,8 +5,18 @@ auth_boot();
 if (is_admin()) { header('Location: /admin/'); exit; }
 $error = '';
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
-    if (try_login((string)($_POST['password'] ?? ''))) { header('Location: /admin/'); exit; }
-    $error = 'Неверный пароль';
+    [$allowed, $retry] = login_rate_register(client_ip());
+    if (!$allowed) {
+        http_response_code(429);
+        $mins = (int)ceil($retry / 60);
+        $error = "Слишком много попыток входа. Подождите ~{$mins} мин.";
+    } elseif (try_login((string)($_POST['password'] ?? ''))) {
+        login_rate_clear(client_ip());
+        header('Location: /admin/');
+        exit;
+    } else {
+        $error = 'Неверный пароль';
+    }
 }
 ?>
 <!doctype html>
