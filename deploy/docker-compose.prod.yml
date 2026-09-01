@@ -1,0 +1,12 @@
+services:
+  web:
+    image: php:8.3-apache
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./lib:/var/www/lib
+      - ./data:/var/www/data
+      - ./bin:/var/www/bin
+      - ./tests:/var/www/tests
