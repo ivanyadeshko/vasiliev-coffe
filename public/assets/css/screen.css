@@ -23,7 +23,10 @@ body { font-family: var(--body); color: var(--cream); }
     linear-gradient(160deg, #1a120c 0%, #120D0A 70%); }
 .vitrine video, .vitrine .poster { position: absolute; inset: 0; width: 100%; height: 100%;
     object-fit: cover; opacity: 0; background-size: cover; background-position: center; }
-.vitrine .poster { transition: opacity 1s ease; }
+.vitrine .poster { transition: opacity 1s ease; transform-origin: 100% 50%;
+    animation: drift 20s ease-in-out infinite alternate; }
+/* медленный «наезд» на постер: экран не выглядит зависшим, пока грузится видео */
+@keyframes drift { from { transform: scale(1); } to { transform: scale(1.06); } }
 .vitrine video.on, .vitrine .poster.on { opacity: 1; }
 .vitrine video.top { z-index: 2; }
 .vitrine video.fade { transition: opacity .5s ease; }
@@ -45,6 +48,58 @@ body[data-screen="3"] .scrim, body[data-screen="4"] .scrim { background:
         rgba(18,13,10,.94) 0%, rgba(18,13,10,0) 16%,
         rgba(18,13,10,0) 30%, rgba(18,13,10,.9) 48%,
         rgba(18,13,10,.97) 100%); }
+
+/* ---- лоадер видео ---- */
+/* центр видимой части витрины — до начала меню */
+.loader { position: absolute; top: 120px; bottom: 0; left: 0; width: 36%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background:
+        radial-gradient(300px 330px at 50% 46%, rgba(18,13,10,.88), rgba(18,13,10,.55) 60%, rgba(18,13,10,0)),
+        linear-gradient(90deg, rgba(18,13,10,.45), rgba(18,13,10,.25) 70%, rgba(18,13,10,0));
+    opacity: 0; transition: opacity .6s ease, transform .6s ease; }
+body[data-screen="3"] .loader, body[data-screen="4"] .loader { width: 32%; }
+.loader.show { opacity: 1; }
+.loader.done { opacity: 0; transform: scale(1.04); }
+.loader .emblem { width: 290px; height: 290px; overflow: visible; }
+.loader .emblem * { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.loader .ring-track { stroke: var(--line); stroke-width: 3; }
+.loader .ring { stroke: var(--accent); stroke-width: 4; stroke-dasharray: 100; stroke-dashoffset: 100;
+    transform: rotate(-90deg); transform-box: fill-box; transform-origin: center;
+    transition: stroke-dashoffset .6s ease, stroke .6s ease;
+    filter: drop-shadow(0 0 6px rgba(233, 162, 59, .55)); }
+.loader .draw { stroke-dasharray: 100; stroke-dashoffset: 100; }
+.loader .cup, .loader .handle { stroke: #E8C79A; stroke-width: 7; }
+.loader .em { stroke: var(--accent); stroke-width: 10; stroke-linecap: square; stroke-linejoin: miter; }
+.loader .coffee { fill: var(--accent); stroke: #B97A3E; stroke-width: 3; opacity: .85; }
+.loader .steam { stroke: var(--accent-hi); stroke-width: 6; stroke-dasharray: 100;
+    stroke-dashoffset: 100; opacity: 0; }
+.loader.show .draw { animation: draw .9s ease-out forwards; }
+.loader.show .em { animation-delay: .35s; }
+.loader.show .coffee { animation: breathe 3s ease-in-out infinite; }
+.loader.show .steam { animation: steam 2.4s ease-in-out .9s infinite; }
+.loader.show .s2 { animation-delay: 1.3s; }
+.loader.show .s3 { animation-delay: 1.7s; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes breathe { 0%, 100% { opacity: .78; } 50% { opacity: .95; } }
+/* пар поднимается: путь идёт от чашки вверх — проявляется снизу и тает хвостом вверх */
+@keyframes steam {
+    0% { stroke-dashoffset: 100; opacity: 0; }
+    20% { opacity: 1; }
+    55% { stroke-dashoffset: 0; opacity: 1; }
+    100% { stroke-dashoffset: -100; opacity: 0; }
+}
+.loader .wordmark { margin-top: 30px; font-family: var(--disp); font-weight: 700; font-size: 46px;
+    letter-spacing: .18em; padding-left: .18em; color: var(--accent);
+    background: linear-gradient(100deg, var(--accent) 35%, var(--accent-hi) 50%, var(--accent) 65%);
+    background-size: 300% 100%; -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; animation: shimmer 3.2s linear infinite; }
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -50% 0; } }
+.loader .caption { margin-top: 14px; font-size: 22px; font-weight: 600; letter-spacing: .04em;
+    color: var(--mut); font-variant-numeric: tabular-nums; }
+/* нет связи: кольцо гаснет, пар замедляется, подпись с отсчётом */
+.loader.offline .ring { stroke: var(--mut); filter: none; }
+.loader.offline .steam { animation-duration: 4.8s; }
+.loader.offline .caption { color: var(--cream); }
 
 /* ---- шапка ---- */
 .tvhead { position: absolute; top: 0; left: 0; right: 0; height: 120px; padding: 0 64px;
@@ -98,4 +153,7 @@ body[data-screen="3"] .menu, body[data-screen="4"] .menu { left: 32%; }
 @media (prefers-reduced-motion: reduce) {
     .menu.swap { animation: none; }
     .pr.flash { animation: none; }
+    .vitrine .poster, .loader .wordmark, .loader.show .coffee, .loader.show .steam { animation: none; }
+    .loader.show .draw { animation: none; stroke-dashoffset: 0; }
+    .loader.show .steam { opacity: .8; stroke-dashoffset: 0; }
 }

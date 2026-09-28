@@ -3,3 +3,4 @@ data/backups/
 public/assets/fonts/*.woff2
 public/assets/video/*.mp4
 data/login-attempts.json
+data/logs/

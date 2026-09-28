@@ -65,34 +65,115 @@
         if (menuEl.scrollHeight > menuEl.clientHeight) stage.classList.add('compact');
     }
 
+    var posterEl = document.getElementById('poster');
+    var loader = window.MokkoLoader(document.getElementById('loader'));
+    var log = window.MokkoLog;
+    var mediaGen = 0;
+    var activeUrls = [];
+
+    function revokeLater(urls) {
+        // освобождаем с запасом: последний кадр старого плеера ещё может быть на экране
+        setTimeout(function () { urls.forEach(function (u) { URL.revokeObjectURL(u); }); }, 10000);
+    }
+
     function setupMedia(payload) {
         var m = payload.menu.media || { videos: [], poster: '' };
         var key = JSON.stringify(m);
         if (key === mediaKey) return;
         mediaKey = key;
-        if (player) player.stop();
-        var toUrl = function (v) { return '/assets/video/' + v; };
-        var scenes;
+        var gen = ++mediaGen;
+        var manifest = m.files || {};
+        var hasManifest = !!m.files;
+        var raw;
         if (m.scenes && m.scenes.length) {
-            scenes = m.scenes.map(function (s) {
-                return { videos: (s.videos || []).map(toUrl),
-                         intro: s.intro || 0,
+            raw = m.scenes.map(function (s) {
+                return { names: s.videos || [], intro: s.intro || 0,
                          loops: s.loops == null ? 5 : s.loops };
             });
         } else {
             // легаси: список клипов = одна сцена, последний клип цикловой
-            var vs = (m.videos || []).map(toUrl);
-            scenes = vs.length ? [{ videos: vs, intro: vs.length - 1,
+            var vs = m.videos || [];
+            raw = vs.length ? [{ names: vs, intro: vs.length - 1,
                 loops: m.last_loops == null ? 5 : m.last_loops }] : [];
         }
-        player = window.MokkoPlayer({
-            scenes: scenes,
-            poster: m.poster ? '/assets/img/' + m.poster : '',
-            a: document.getElementById('vid-a'),
-            b: document.getElementById('vid-b'),
-            posterEl: document.getElementById('poster')
+        // клипы, которых нет на сервере, пропускаем — иначе загрузка никогда не закончится;
+        // границу цикла пересчитываем по уцелевшим сюжетным клипам
+        raw.forEach(function (s) {
+            var intro = 0;
+            s.names = s.names.filter(function (n, i) {
+                var ok = !hasManifest || !!manifest[n];
+                if (!ok) log.warn('media.missing', { file: n });
+                else if (i < s.intro) intro++;
+                return ok;
+            });
+            s.intro = intro;
         });
-        player.start();
+        raw = raw.filter(function (s) { return s.names.length > 0; });
+
+        var files = [], seen = {};
+        raw.forEach(function (s) {
+            s.names.forEach(function (n) {
+                if (seen[n]) return;
+                seen[n] = true;
+                var f = manifest[n] || { size: 0, v: 0 };
+                files.push({ name: n, size: f.size, v: f.v,
+                             url: '/assets/video/' + encodeURIComponent(n) + '?v=' + f.v });
+            });
+        });
+        var poster = m.poster ? '/assets/img/' + m.poster : '';
+        if (poster) posterEl.style.backgroundImage = 'url(' + poster + ')';
+
+        var playing = player && player.status().state === 'playing';
+        var launch = function (urls) {
+            var scenes = raw.map(function (s) {
+                return { videos: s.names.map(function (n) { return urls[n]; }), names: s.names,
+                         intro: s.intro, loops: s.loops };
+            });
+            var from = player ? player.stop(true) : null;
+            revokeLater(activeUrls);
+            activeUrls = Object.keys(urls).map(function (n) { return urls[n]; });
+            player = window.MokkoPlayer({
+                scenes: scenes, poster: poster, from: from,
+                a: document.getElementById('vid-a'),
+                b: document.getElementById('vid-b'),
+                posterEl: posterEl,
+                onEvent: function (event, data) {
+                    (event === 'player.retry' ? log.warn : log.error)(event, data);
+                }
+            });
+            player.start();
+        };
+
+        if (!files.length) { loader.done(); launch({}); return; }
+        // пока видео не играет — постер под лоадером; играет — докачиваем фоном
+        if (!playing) posterEl.classList.add('on');
+        var loaderTimer = playing ? null : setTimeout(function () {
+            if (gen === mediaGen) loader.show();
+        }, 400);
+        window.MokkoMediaCache.ensure({
+            screen: screenId,
+            files: files,
+            isCancelled: function () { return gen !== mediaGen; },
+            onProgress: function (done, total) {
+                if (gen === mediaGen && loader.isVisible()) loader.progress(done, total);
+            },
+            onRetry: function (sec) {
+                if (gen === mediaGen && loader.isVisible()) loader.retry(sec);
+            }
+        }).then(function (urls) {
+            if (!urls || gen !== mediaGen) return;
+            clearTimeout(loaderTimer);
+            loader.done(function () {
+                // за время прощальной анимации медиа могли смениться ещё раз
+                if (gen !== mediaGen) {
+                    Object.keys(urls).forEach(function (n) { URL.revokeObjectURL(urls[n]); });
+                    return;
+                }
+                launch(urls);
+            });
+        }).catch(function (e) {
+            log.error('media.fatal', { msg: String(e && e.message || e) });
+        });
     }
 
     var etag = null;
@@ -169,6 +250,27 @@
             .then(schedule);
     }
     poll();
+
+    (function boot() {
+        var c = navigator.connection || {};
+        var info = { ua: navigator.userAgent, w: window.innerWidth, h: window.innerHeight,
+                     dpr: window.devicePixelRatio, downlink: c.downlink, net: c.effectiveType,
+                     idb: !!window.indexedDB };
+        if (navigator.storage && navigator.storage.estimate) {
+            navigator.storage.estimate().then(function (e) {
+                info.quota_mb = Math.round(e.quota / 1048576);
+                info.usage_mb = Math.round(e.usage / 1048576);
+            }).catch(function () {}).then(function () { log.info('boot', info); });
+        } else {
+            log.info('boot', info);
+        }
+    })();
+
+    setInterval(function () {
+        var st = player ? player.status() : { state: 'none', clip: null };
+        log.info('heartbeat', { state: loader.isVisible() ? 'loading' : st.state, clip: st.clip,
+                                uptime_min: Math.round((Date.now() - startedAt) / 60000) });
+    }, 600000);
 
     setInterval(function () {
         if (!current) return;

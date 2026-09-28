@@ -9,13 +9,25 @@ $id = (int)($_GET['screen'] ?? 0);
 if ($id < 1 || $id > 4) { http_response_code(404); echo '{"error":"screen: 1..4"}'; exit; }
 
 $menuFile = "screen-$id.json";
-$etag = etag_for($menuFile, 'settings.json');
+$menu = load_json_with_fallback($menuFile);
+if ($menu === null) { http_response_code(500); echo '{"error":"данные недоступны"}'; exit; }
+
+// манифест клипов: экран скачивает их заранее и по v понимает, что файл заменили
+$files = [];
+$media = $menu['media'] ?? [];
+$names = $media['videos'] ?? [];
+foreach ($media['scenes'] ?? [] as $s) $names = array_merge($names, $s['videos'] ?? []);
+foreach ($names as $n) {
+    $p = __DIR__ . '/../assets/video/' . basename((string)$n);
+    if (is_file($p)) $files[basename((string)$n)] = ['size' => filesize($p), 'v' => filemtime($p)];
+}
+$menu['media']['files'] = (object)$files;
+
+$etag = '"' . md5(etag_for($menuFile, 'settings.json') . json_encode($files)) . '"';
 header("ETag: $etag");
 if (($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag) { http_response_code(304); exit; }
 
-$menu = load_json_with_fallback($menuFile);
 $settings = load_json('settings.json') ?? [];
-if ($menu === null) { http_response_code(500); echo '{"error":"данные недоступны"}'; exit; }
 
 echo json_encode([
     'settings' => [

@@ -20,3 +20,25 @@ function test_api_menu(): void {
     check_eq($r3['status'], 404, '404 для неверного экрана');
     proc_terminate($proc);
 }
+
+function test_api_menu_manifest(): void {
+    // свой ролик-фикстура: mp4 в репозиторий не коммитятся
+    $dir = sys_get_temp_dir() . '/mokko-manifest-' . getmypid() . '-' . random_int(1000, 9999);
+    mkdir($dir, 0777, true);
+    copy('/var/www/data/settings.json', "$dir/settings.json");
+    $name = 'test-fixture-' . getmypid() . '.mp4';
+    $video = "/var/www/html/assets/video/$name";
+    file_put_contents($video, str_repeat('x', 1234));
+    $menu = json_decode((string)file_get_contents('/var/www/data/screen-1.json'), true);
+    $menu['media'] = ['poster' => '', 'videos' => [],
+        'scenes' => [['videos' => [$name, 'no-such-clip.mp4'], 'intro' => 1, 'loops' => 5]]];
+    file_put_contents("$dir/screen-1.json", json_encode($menu, JSON_UNESCAPED_UNICODE));
+    [$proc, $base] = start_server($dir);
+    $j = json_decode(http('GET', "$base/api/menu.php?screen=1")['body'], true);
+    $files = $j['menu']['media']['files'] ?? null;
+    check_eq($files[$name]['size'] ?? null, 1234, 'media.files: size = размер файла');
+    check(is_int($files[$name]['v'] ?? null), 'media.files: v — версия файла');
+    check(!isset($files['no-such-clip.mp4']), 'media.files: отсутствующего файла нет в манифесте');
+    proc_terminate($proc);
+    unlink($video);
+}
