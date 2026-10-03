@@ -42,3 +42,22 @@ function test_api_menu_manifest(): void {
     proc_terminate($proc);
     unlink($video);
 }
+
+function test_api_menu_build(): void {
+    // версия кода экрана: изменился JS/CSS/страница — экраны перезагрузятся
+    [$proc, $base] = start_server('/var/www/data');
+    $r = http('GET', "$base/api/menu.php?screen=1");
+    $build = json_decode($r['body'], true)['build'] ?? '';
+    check(is_string($build) && preg_match('/^[0-9a-f]{12}$/', $build) === 1, 'build — хеш кода экрана');
+    $page = http('GET', "$base/screen.php?id=1")['body'];
+    check(str_contains($page, 'data-build="' . $build . '"'), 'screen.php знает свой build');
+
+    $fixture = '/var/www/html/assets/js/test-fixture-' . getmypid() . '.js';
+    file_put_contents($fixture, '// ' . random_int(0, PHP_INT_MAX));
+    $r2 = http('GET', "$base/api/menu.php?screen=1", ['headers' => ['If-None-Match: ' . $r['headers']['etag']]]);
+    unlink($fixture);
+    check_eq($r2['status'], 200, 'новый код — не 304: ETag учитывает build');
+    $build2 = json_decode($r2['body'], true)['build'] ?? '';
+    check($build2 !== '' && $build2 !== $build, 'build меняется вместе с кодом');
+    proc_terminate($proc);
+}

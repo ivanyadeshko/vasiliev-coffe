@@ -49,11 +49,10 @@
                 var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = it.name;
                 if (it.volume) { var v = document.createElement('span'); v.className = 'vol'; v.textContent = it.volume; nm.appendChild(v); }
                 if (it.desc) { var ds = document.createElement('span'); ds.className = 'desc'; ds.textContent = it.desc; nm.appendChild(ds); }
-                var dots = document.createElement('span'); dots.className = 'dots';
                 var pr = document.createElement('span'); pr.className = 'pr';
                 pr.dataset.itemId = it.id;
                 pr.textContent = priceText(it.prices);
-                row.appendChild(nm); row.appendChild(dots); row.appendChild(pr);
+                row.appendChild(nm); row.appendChild(pr);
                 cat.appendChild(row);
             });
             cols[c.col === 2 ? 2 : 1].appendChild(cat);
@@ -229,6 +228,23 @@
         pollTimer = setTimeout(poll, sec * 1000);
     }
 
+    // версия кода, с которой загружена страница; после деплоя API отдаст другую —
+    // перезагружаемся, чтобы ТВ не пришлось перезапускать руками
+    var build = document.body.dataset.build || '';
+
+    function reloadForBuild(payload) {
+        if (!build || !payload.build || payload.build === build) return false;
+        // защита от цикла: если после перезагрузки страница всё ещё старая
+        // (кэш прокси), ради той же версии второй раз не перезагружаемся
+        try {
+            if (sessionStorage.getItem('mokko-reloaded-for') === payload.build) return false;
+            sessionStorage.setItem('mokko-reloaded-for', payload.build);
+        } catch (e) {}
+        log.info('reload.build', { from: build, to: payload.build });
+        location.reload();
+        return true;
+    }
+
     function poll() {
         var headers = etag ? { 'If-None-Match': etag } : {};
         fetch('/api/menu.php?screen=' + screenId, { headers: headers, cache: 'no-store' })
@@ -238,7 +254,7 @@
                 etag = r.headers.get('ETag');
                 return r.json();
             })
-            .then(function (payload) { if (payload) applyPayload(payload); })
+            .then(function (payload) { if (payload && !reloadForBuild(payload)) applyPayload(payload); })
             .catch(function () {
                 if (!current) {
                     try {
@@ -266,16 +282,55 @@
         }
     })();
 
+    var perf = window.MokkoPerf({
+        videos: [document.getElementById('vid-a'), document.getElementById('vid-b')],
+        log: log,
+        clip: function () { return player ? player.status().clip : null; }
+    });
+
     setInterval(function () {
         var st = player ? player.status() : { state: 'none', clip: null };
         log.info('heartbeat', { state: loader.isVisible() ? 'loading' : st.state, clip: st.clip,
-                                uptime_min: Math.round((Date.now() - startedAt) / 60000) });
+                                uptime_min: Math.round((Date.now() - startedAt) / 60000),
+                                perf: perf.take() });
     }, 600000);
+
+    // перезагрузка — только когда сервер отвечает: без сети вместо экрана
+    // осталась бы страница ошибки браузера, и до утра его никто не поднимет
+    var reloadPending = false;
+    function reloadWhenOnline(reason) {
+        if (reloadPending) return;
+        reloadPending = true;
+        var attempt = function () {
+            fetch('/api/menu.php?screen=' + screenId, { cache: 'no-store' })
+                .then(function (r) {
+                    if (!r.ok) throw new Error(r.status);
+                    log.info('reload', { reason: reason });
+                    location.reload();
+                })
+                .catch(function () { setTimeout(attempt, 30000); });
+        };
+        attempt();
+    }
+
+    // На ночь ТВ уходят в standby: страница замирает целиком, а утром
+    // продолжает вчерашний показ — reload_at в 04:00 при этом не наступает.
+    // Пробуждение видно по разрыву таймера: тогда и перезагружаемся
+    var lastTick = Date.now();
+    setInterval(function () {
+        var now = Date.now();
+        var slept = now - lastTick;
+        lastTick = now;
+        if (slept > 300000) {
+            log.info('wake', { slept_min: Math.round(slept / 60000) });
+            reloadWhenOnline('wake');
+        }
+    }, 20000);
 
     setInterval(function () {
         if (!current) return;
         var d = new Date();
         var hm = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
-        if (hm === current.settings.reload_at && Date.now() - startedAt > 120000) location.reload();
+        if (hm === current.settings.reload_at && Date.now() - startedAt > 120000) reloadWhenOnline('schedule');
     }, 60000);
 })();

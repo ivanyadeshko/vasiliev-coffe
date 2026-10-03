@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/../lib/build.php';
 $id = (int)($_GET['id'] ?? 0);
 if ($id < 1 || $id > 4) { http_response_code(404); exit('нет такого экрана'); }
 // ?v=mtime: после деплоя ТВ не соберёт новую страницу со старыми скриптами из кэша
@@ -15,7 +16,7 @@ function asset(string $path): string {
 <link rel="stylesheet" href="/assets/fonts/fonts.css">
 <link rel="stylesheet" href="<?= asset('/assets/css/screen.css') ?>">
 </head>
-<body data-screen="<?= $id ?>">
+<body data-screen="<?= $id ?>" data-build="<?= screen_build(__DIR__) ?>">
 <div id="fit"><div id="stage">
     <div id="vitrine" class="vitrine">
         <video id="vid-a" muted playsinline preload="auto"></video>
@@ -50,5 +51,6 @@ function asset(string $path): string {
 <script src="<?= asset('/assets/js/media-cache.js') ?>"></script>
 <script src="<?= asset('/assets/js/loader.js') ?>"></script>
 <script src="<?= asset('/assets/js/player.js') ?>"></script>
+<script src="<?= asset('/assets/js/perf.js') ?>"></script>
 <script src="<?= asset('/assets/js/screen.js') ?>"></script>
 </body></html>

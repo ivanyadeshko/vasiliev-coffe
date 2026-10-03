@@ -5,13 +5,18 @@ window.MokkoPlayer = function (opts) {
     // k полных проходов (0 = бесконечно), затем следующая сцена.
     //
     // Стыки: следующий клип предзагружается, пока играет текущий.
-    // Внутри сцены — мгновенная склейка (кадры цикла совпадают, стык невидим).
-    // Смена сцены — быстрый фейд НОВОГО ролика поверх старого: старый не
+    // Внутри сцены — жёсткая склейка без фейда: последний кадр ролика совпадает
+    // с первым кадром следующего, а полупрозрачное наложение двух видео на ТВ
+    // мигает. Смена сцены — фейд НОВОГО ролика поверх старого: старый не
     // гаснет, поэтому нет ни провала яркости, ни мигания.
     //
     // Сбой (ошибка, таймаут, отказ play(), зависание) — постер, но не навсегда:
     // через RETRY_MS пробуем снова со следующего клипа.
     var RETRY_MS = 30000, STALL_MS = 15000;
+    // смена сцены: фейд FADE_S (= transition у .fade) начинается за SCENE_EARLY_S
+    // до конца ролика (запас на шаг timeupdate ~250 мс — старый не должен замереть
+    // до конца фейда); склейка внутри сцены — за CUT_EARLY_S (~2 кадра при 24 fps)
+    var FADE_S = 1, SCENE_EARLY_S = 1.4, CUT_EARLY_S = 0.08;
     var scenes = opts.scenes || [];
     var a = opts.a, b = opts.b, posterEl = opts.posterEl;
     var state = { si: 0, ci: 0, passes: 0 };
@@ -40,7 +45,7 @@ window.MokkoPlayer = function (opts) {
 
     function reset(el) {
         detach(el);
-        el.classList.remove('on', 'top', 'fade', 'fade-fast');
+        el.classList.remove('on', 'top', 'fade');
         el.removeAttribute('src');
         try { el.load(); } catch (e) {}
     }
@@ -99,6 +104,21 @@ window.MokkoPlayer = function (opts) {
         el.load();
     }
 
+    // cb — когда ролик после play() реально вывел кадр. Страховочный таймаут:
+    // предзагруженный ролик и так показывает первый кадр, склейка не даст чёрного
+    function firstFrame(el, cb) {
+        var done = false;
+        var t = setTimeout(function () { fin(); }, 500);
+        var fin = function () { if (!done) { done = true; clearTimeout(t); cb(); } };
+        if (el.requestVideoFrameCallback) { el.requestVideoFrameCallback(fin); return; }
+        var t0 = el.currentTime;
+        var poll = function () {
+            if (done) return;
+            if (el.currentTime !== t0) fin(); else requestAnimationFrame(poll);
+        };
+        requestAnimationFrame(poll);
+    }
+
     // сторож: видео «играет», но кадр не двигается — считаем сбоем
     function watch() {
         clearInterval(watchTimer);
@@ -119,29 +139,45 @@ window.MokkoPlayer = function (opts) {
                 fail(why.reason === 'timeout' ? 'player.timeout' : 'player.error', why);
                 return;
             }
-            el.classList.add('top');
-            if (cur || handoff) el.classList.add(sceneChange || !cur ? 'fade' : 'fade-fast');
+            var old = cur || handoff;
+            // склейка: новый ролик стартует ПОД старым и открывается мгновенно,
+            // как только вывел кадр. Иначе (смена сцены, передача от прошлого
+            // плеера) — фейд поверх старого
+            var cut = !!cur && !sceneChange;
+            if (cut) {
+                old.classList.add('top');
+                el.classList.add('on');
+            } else {
+                el.classList.add('top');
+                if (old) el.classList.add('fade');
+            }
             var p = el.play();
             var reveal = function () {
                 if (stopped || failed) return;
-                el.classList.add('on');
                 posterEl.classList.remove('on');
                 lastMove = Date.now();
-                var old = cur || handoff;
                 handoff = null;
                 cur = el;
-                var cleanup = function () {
-                    if (stopped) return;
-                    if (old && old !== cur) old.classList.remove('on', 'top', 'fade', 'fade-fast');
-                    el.classList.remove('top', 'fade', 'fade-fast');
-                };
-                setTimeout(cleanup, sceneChange ? 600 : 400);
+                if (cut) {
+                    firstFrame(el, function () {
+                        if (!stopped && !failed) old.classList.remove('on', 'top');
+                    });
+                } else {
+                    el.classList.add('on');
+                    setTimeout(function () {
+                        if (stopped) return;
+                        if (old && old !== cur) old.classList.remove('on', 'top', 'fade');
+                        el.classList.remove('top', 'fade');
+                    }, FADE_S * 1000 + 100);
+                }
                 // предзагрузка следующего клипа, пока играет текущий
+                // (после фейда: старый ролик должен успеть погаснуть)
                 var nx = computeNext(state);
                 var other = el === a ? b : a;
                 setTimeout(function () {
-                    if (!stopped && !failed) prepare(other, srcOf(nx), function () {});
-                }, 1000);
+                    // cur !== el — следующий стык уже занял other, не трогаем его
+                    if (!stopped && !failed && cur === el) prepare(other, srcOf(nx), function () {});
+                }, FADE_S * 1000 + 500);
                 var fired = false;
                 var trigger = function () {
                     if (fired || stopped || failed) return;
@@ -155,12 +191,20 @@ window.MokkoPlayer = function (opts) {
                 el.onerror = function () {
                     fail('player.error', { reason: 'playback', code: el.error ? el.error.code : 0 });
                 };
-                // любой стык начинаем чуть раньше конца клипа: новый фейдится
-                // поверх ещё ДВИЖУЩЕГОСЯ старого — ни стоп-кадра, ни видимого шва
-                var early = nx.sceneChange ? 0.6 : 0.35;
-                el.ontimeupdate = function () {
-                    if (el.duration && el.duration - el.currentTime <= early) trigger();
-                };
+                // смену сцены начинаем раньше конца клипа: новый фейдится поверх
+                // ещё ДВИЖУЩЕГОСЯ старого — без стоп-кадра. Склейку — у самого конца
+                var early = nx.sceneChange ? SCENE_EARLY_S : CUT_EARLY_S;
+                var near = function () { return el.duration && el.duration - el.currentTime <= early; };
+                el.ontimeupdate = function () { if (near()) trigger(); };
+                // timeupdate приходит раз в ~250 мс — для склейки грубо,
+                // поэтому, где браузер умеет, сверяемся на каждом кадре
+                if (!nx.sceneChange && el.requestVideoFrameCallback) {
+                    var onFrame = function () {
+                        if (fired || stopped || failed || cur !== el) return;
+                        if (near()) trigger(); else el.requestVideoFrameCallback(onFrame);
+                    };
+                    el.requestVideoFrameCallback(onFrame);
+                }
             };
             if (p && p.then) p.then(reveal).catch(function (e) {
                 fail('player.play_rejected', { name: e && e.name, msg: e && e.message });
@@ -185,7 +229,7 @@ window.MokkoPlayer = function (opts) {
             clearInterval(watchTimer);
             var vis = keep && cur && !failed ? cur : null;
             [a, b].forEach(function (el) {
-                if (el === vis) { detach(el); el.classList.remove('top', 'fade', 'fade-fast'); }
+                if (el === vis) { detach(el); el.classList.remove('top', 'fade'); }
                 else reset(el);
             });
             return vis;

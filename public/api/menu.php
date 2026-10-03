@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../../lib/storage.php';
+require_once __DIR__ . '/../../lib/build.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -23,7 +24,8 @@ foreach ($names as $n) {
 }
 $menu['media']['files'] = (object)$files;
 
-$etag = '"' . md5(etag_for($menuFile, 'settings.json') . json_encode($files)) . '"';
+$build = screen_build(__DIR__ . '/..');
+$etag = '"' . md5(etag_for($menuFile, 'settings.json') . json_encode($files) . $build) . '"';
 header("ETag: $etag");
 if (($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag) { http_response_code(304); exit; }
 
@@ -37,4 +39,5 @@ echo json_encode([
         'reload_at' => $settings['reload_at'] ?? '04:00',
     ],
     'menu' => $menu,
+    'build' => $build,
 ], JSON_UNESCAPED_UNICODE);
