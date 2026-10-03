@@ -48,3 +48,9 @@ function test_validate_rejects(): void {
     for ($i = 0; $i < 41; $i++) { $it['id'] = "i$i"; $d['categories'][0]['items'][] = $it; }
     check(validate_screen($d) !== [], 'больше 40 позиций');
 }
+function test_validate_desc_multiline_ok(): void {
+    // оператор переносит состав на новую строку Enter'ом в админке
+    $d = valid_screen_fixture();
+    $d['categories'][0]['items'][0]['desc'] = "эспрессо, молоко\nсироп на выбор";
+    check_eq(validate_screen($d), [], 'перевод строки в описании допустим');
+}

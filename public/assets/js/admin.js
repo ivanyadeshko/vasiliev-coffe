@@ -18,12 +18,24 @@
         return i;
     }
 
+    // высота поля состава — по тексту: виден весь состав и все переносы строк
+    function fitDesc(t) {
+        t.style.height = 'auto';
+        t.style.height = (t.scrollHeight + t.offsetHeight - t.clientHeight) + 'px';
+    }
+    function fitAll() { [].forEach.call(root.querySelectorAll('textarea.f-desc'), fitDesc); }
+    window.addEventListener('resize', fitAll);
+
     function renderItem(cat, it, ii) {
         var row = el('div', 'row' + (it.visible ? '' : ' off'));
         var name = input(it.name, 'f-name', 'название');
         name.oninput = function () { it.name = name.value; };
-        var desc = input(it.desc, 'f-desc', 'состав');
-        desc.oninput = function () { it.desc = desc.value; };
+        // состав — многострочный: Enter переносит текст на новую строку на экране
+        var desc = el('textarea', 'f-desc');
+        desc.value = it.desc == null ? '' : it.desc;
+        desc.placeholder = 'состав (Enter — новая строка)';
+        desc.rows = 1;
+        desc.oninput = function () { it.desc = desc.value; fitDesc(desc); };
         var vol = input(it.volume, 'f-vol', 'объём');
         vol.oninput = function () { it.volume = vol.value; };
         var p1 = input(it.prices[0], 'f-price', '₽');
@@ -79,6 +91,7 @@
             box.appendChild(add);
             root.appendChild(box);
         });
+        fitAll();
     }
 
     document.getElementById('save').onclick = function () {

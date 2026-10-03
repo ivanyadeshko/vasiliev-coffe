@@ -50,7 +50,9 @@
                 var row = document.createElement('div'); row.className = 'item';
                 var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = it.name;
                 if (it.volume) { var v = document.createElement('span'); v.className = 'vol'; v.textContent = it.volume; nm.appendChild(v); }
-                if (it.desc) { var ds = document.createElement('span'); ds.className = 'desc'; ds.textContent = it.desc; nm.appendChild(ds); }
+                // trim: случайный Enter в конце описания не добавит пустую строку
+                var desc = (it.desc || '').trim();
+                if (desc) { var ds = document.createElement('span'); ds.className = 'desc'; ds.textContent = desc; nm.appendChild(ds); }
                 var pr = document.createElement('span'); pr.className = 'pr';
                 pr.dataset.itemId = it.id;
                 pr.textContent = priceText(it.prices);
