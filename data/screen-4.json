@@ -9,8 +9,7 @@
             {
                 "videos": [
                     "screen-4-a1.mp4",
-                    "screen-4-al.mp4",
-                    "screen-4-al-rev.mp4"
+                    "screen-4-al-loop.mp4"
                 ],
                 "intro": 1,
                 "loops": 3

@@ -86,10 +86,14 @@ window.MokkoPerf = function (opts) {
             }
         }
 
-        el.addEventListener('playing', function () {
+        function start() {
             stop();
             if (el.requestVideoFrameCallback) el.requestVideoFrameCallback(onFrame(token));
-        });
+        }
+
+        el.addEventListener('playing', start);
+        // нативный loop перематывает в начало без нового 'playing'
+        el.addEventListener('seeked', function () { if (!el.paused) start(); });
         ['pause', 'waiting', 'seeking'].forEach(function (ev) { el.addEventListener(ev, stop); });
         el.addEventListener('ended', function () { stop(); sample(); });
         el.addEventListener('pause', sample);

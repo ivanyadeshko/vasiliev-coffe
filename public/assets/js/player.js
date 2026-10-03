@@ -5,6 +5,9 @@ window.MokkoPlayer = function (opts) {
     // k полных проходов (0 = бесконечно), затем следующая сцена.
     //
     // Стыки: следующий клип предзагружается, пока играет текущий.
+    // Цикловая часть из одного клипа крутится нативным loop в том же <video>:
+    // без нового декодера на каждом проходе (на слабых ТВ это самое дорогое),
+    // следующий клип грузится только на последнем проходе.
     // Внутри сцены — жёсткая склейка без фейда: последний кадр ролика совпадает
     // с первым кадром следующего, а полупрозрачное наложение двух видео на ТВ
     // мигает. Смена сцены — фейд НОВОГО ролика поверх старого: старый не
@@ -40,6 +43,7 @@ window.MokkoPlayer = function (opts) {
 
     function detach(el) {
         el.onended = el.ontimeupdate = el.onerror = el.oncanplaythrough = null;
+        el.loop = false;
         try { el.pause(); } catch (e) {}
     }
 
@@ -170,14 +174,22 @@ window.MokkoPlayer = function (opts) {
                         el.classList.remove('top', 'fade');
                     }, FADE_S * 1000 + 100);
                 }
-                // предзагрузка следующего клипа, пока играет текущий
-                // (после фейда: старый ролик должен успеть погаснуть)
                 var nx = computeNext(state);
                 var other = el === a ? b : a;
-                setTimeout(function () {
+                var preload = function () {
                     // cur !== el — следующий стык уже занял other, не трогаем его
                     if (!stopped && !failed && cur === el) prepare(other, srcOf(nx), function () {});
-                }, FADE_S * 1000 + 500);
+                };
+                // единственный цикловой клип: лишние проходы — нативным loop
+                var sc = scenes[state.si];
+                var repeats = state.ci === sc.intro && sc.intro === sc.videos.length - 1
+                    ? (sc.loops === 0 ? Infinity : sc.loops - 1 - state.passes) : 0;
+                var lastAt = 0;
+                el.loop = repeats > 0;
+                // предзагрузка следующего клипа, пока играет текущий
+                // (после фейда: старый ролик должен успеть погаснуть);
+                // при нативном цикле — только на последнем проходе
+                if (!el.loop) setTimeout(preload, FADE_S * 1000 + 500);
                 var fired = false;
                 var trigger = function () {
                     if (fired || stopped || failed) return;
@@ -193,12 +205,27 @@ window.MokkoPlayer = function (opts) {
                 };
                 // смену сцены начинаем раньше конца клипа: новый фейдится поверх
                 // ещё ДВИЖУЩЕГОСЯ старого — без стоп-кадра. Склейку — у самого конца
-                var early = nx.sceneChange ? SCENE_EARLY_S : CUT_EARLY_S;
-                var near = function () { return el.duration && el.duration - el.currentTime <= early; };
-                el.ontimeupdate = function () { if (near()) trigger(); };
+                var near = function () {
+                    var early = nx.sceneChange ? SCENE_EARLY_S : CUT_EARLY_S;
+                    return !el.loop && el.duration && el.duration - el.currentTime <= early;
+                };
+                el.ontimeupdate = function () {
+                    // нативный цикл перескочил в начало — начался следующий проход;
+                    // на последнем цикл снимаем: ролик доиграет до стыка со сценой
+                    if (el.loop && el.currentTime < lastAt - 1) {
+                        state = { si: state.si, ci: state.ci, passes: state.passes + 1, sceneChange: false };
+                        if (--repeats <= 0) {
+                            el.loop = false;
+                            nx = computeNext(state);
+                            preload();
+                        }
+                    }
+                    lastAt = el.currentTime;
+                    if (near()) trigger();
+                };
                 // timeupdate приходит раз в ~250 мс — для склейки грубо,
                 // поэтому, где браузер умеет, сверяемся на каждом кадре
-                if (!nx.sceneChange && el.requestVideoFrameCallback) {
+                if (!el.loop && !nx.sceneChange && el.requestVideoFrameCallback) {
                     var onFrame = function () {
                         if (fired || stopped || failed || cur !== el) return;
                         if (near()) trigger(); else el.requestVideoFrameCallback(onFrame);

@@ -19,8 +19,7 @@
                 "videos": [
                     "screen-2-b1.mp4",
                     "screen-2-b2.mp4",
-                    "screen-2-bl.mp4",
-                    "screen-2-bl-rev.mp4"
+                    "screen-2-bl-loop.mp4"
                 ],
                 "intro": 2,
                 "loops": 2

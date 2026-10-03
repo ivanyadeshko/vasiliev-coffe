@@ -144,12 +144,14 @@ body[data-screen="3"] .menu, body[data-screen="4"] .menu { left: 32%; }
 .item { display: flex; align-items: baseline; gap: 28px; margin-bottom: 18px; }
 .item .nm { font-size: 32px; font-weight: 600; line-height: 1.2; }
 .item .vol { display: block; font-size: 20px; font-weight: 500; color: var(--mut); margin-top: 2px; }
+/* описание занимает всю ширину до цены — без пустоты перед ней
+   (поэтому и у цены нет min-width: короткая цена не держит пустой резерв) */
 .item .desc { display: block; font-size: 21px; font-weight: 400; color: var(--mut);
-    line-height: 1.35; max-width: 30ch; }
+    line-height: 1.35; }
 /* цена всегда у правого края колонки, как бы коротко ни было название */
 .item .pr { margin-left: auto; flex-shrink: 0;
     font-size: 34px; font-weight: 700; color: var(--accent); white-space: nowrap;
-    font-variant-numeric: tabular-nums; min-width: 150px; text-align: right;
+    font-variant-numeric: tabular-nums; text-align: right;
     transition: opacity .4s; }
 .pr.flash { animation: flash 1.5s ease-out; }
 @keyframes flash {
