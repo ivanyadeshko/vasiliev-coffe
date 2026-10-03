@@ -38,6 +38,8 @@
         document.title = payload.settings.brand + ' · ' + payload.menu.title;
         var cols = { 1: document.createElement('div'), 2: document.createElement('div') };
         payload.menu.categories.forEach(function (c) {
+            // все позиции скрыты — категорию не показываем (так её прячут из админки)
+            if (!c.items.some(function (it) { return it.visible; })) return;
             var cat = document.createElement('section');
             cat.className = 'cat';
             var h = document.createElement('h3'); h.textContent = c.title;
