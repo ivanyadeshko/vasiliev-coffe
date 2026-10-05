@@ -12,11 +12,27 @@
     var player = null;
     var mediaKey = null;
 
+    // Сцена — 1920 по ширине, высота подстраивается под окно: браузер ТВ
+    // забирает часть высоты под свою панель (окно 1920×1022, не 16:9),
+    // и при жёстких 1080 сцена вписывалась по высоте с чёрными полосами по бокам.
+    // Вёрстка привязана к краям, поэтому высота может «плавать»; пределы —
+    // чтобы меню не ломалось на экзотических окнах (там остаются полосы).
+    var STAGE_MIN_H = 960, STAGE_MAX_H = 1080;
     function fitStage() {
-        var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        var w = window.innerWidth, h = window.innerHeight;
+        var stageH = Math.max(STAGE_MIN_H, Math.min(STAGE_MAX_H, 1920 * h / w));
+        var s = Math.min(w / 1920, h / stageH);
         fit.style.width = (1920 * s) + 'px';
-        fit.style.height = (1080 * s) + 'px';
+        fit.style.height = (stageH * s) + 'px';
+        stage.style.height = stageH + 'px';
         stage.style.transform = 'scale(' + s + ')';
+        fitMenu();
+    }
+
+    // меню не влезает по высоте — компактный режим
+    function fitMenu() {
+        stage.classList.remove('compact');
+        if (menuEl.scrollHeight > menuEl.clientHeight) stage.classList.add('compact');
     }
     window.addEventListener('resize', fitStage);
     fitStage();
@@ -64,8 +80,7 @@
         menuEl.innerHTML = '';
         menuEl.appendChild(cols[1]);
         menuEl.appendChild(cols[2]);
-        stage.classList.remove('compact');
-        if (menuEl.scrollHeight > menuEl.clientHeight) stage.classList.add('compact');
+        fitMenu();
     }
 
     var posterEl = document.getElementById('poster');
