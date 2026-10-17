@@ -8,11 +8,13 @@
         "scenes": [
             {
                 "videos": [
-                    "screen-4-a1.mp4",
-                    "screen-4-al-loop.mp4"
+                    "screen-4-c1.mp4",
+                    "screen-4-c2.mp4",
+                    "screen-4-c3.mp4",
+                    "screen-4-c4.mp4"
                 ],
-                "intro": 1,
-                "loops": 3
+                "intro": 3,
+                "loops": 6
             },
             {
                 "videos": [

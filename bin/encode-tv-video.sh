@@ -1,38 +1,30 @@
 #!/usr/bin/env bash
 # ТВ-версия ролика из оригинала Grok (оригиналы — в media-originals/, вне git).
-#   bin/encode-tv-video.sh <оригинал.mp4> <выход.mp4> [pingpong] [silent-audio]
+#   bin/encode-tv-video.sh <оригинал.mp4> <выход.mp4> [silent-audio]
 #
 # - Обрезка до видимой части: витрина 1280×1080 сцены показывает исходник
 #   1280×720 через object-fit: cover, прижатым вправо (object-position 100%),
 #   то есть только правые 854×720. Декодировать остальную треть кадра незачем.
 # - Пиковый битрейт ограничен (VBV): слабому декодеру ТВ не прилетают всплески.
 # - По умолчанию только видео: звук браузер декодирует даже у muted-ролика.
-# - pingpong: цикл «вперёд + назад» одним файлом — кадры 0..N и N-1..1,
-#   без повторов на стыках; плеер крутит его нативным loop без смены декодера.
+# - Циклы — только «вперёд»: Grok reference_to_video с одним и тем же кадром
+#   в first_frame и last_frame. Реверс (вперёд + назад) не делаем: мёд течёт
+#   вверх, пар уходит обратно в чашку — смотрится неестественно.
 # - silent-audio: дорожка тишины. ТВ экрана 2 (WebView Chrome 113) изредка
 #   зависает в самом начале беззвучного ролика — со звуком такого не было.
 set -euo pipefail
 in=$1 out=$2
 shift 2
-pingpong= ain=() aout=(-an)
+ain=() aout=(-an)
 for opt in "$@"; do
     case $opt in
-        pingpong) pingpong=1 ;;
         silent-audio) ain=(-f lavfi -i anullsrc=r=48000:cl=stereo)
                       aout=(-map 1:a -c:a aac -b:a 32k -shortest) ;;
         *) echo "неизвестная опция: $opt" >&2; exit 1 ;;
     esac
 done
 
-crop='crop=854:720:426:0'
-if [ -n "$pingpong" ]; then
-    vf="[0:v:0]$crop,split[f][b];[b]reverse,trim=start_frame=1,setpts=PTS-STARTPTS[r0];"
-    # у реверса отбрасываем и последний кадр (= первый кадр прямого прохода)
-    n=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 "$in")
-    vf+="[r0]trim=end_frame=$((n - 2)),setpts=PTS-STARTPTS[r];[f][r]concat=n=2:v=1:a=0[v]"
-else
-    vf="[0:v:0]$crop[v]"
-fi
+vf='[0:v:0]crop=854:720:426:0[v]'
 
 ffmpeg -v error -y -i "$in" ${ain[@]+"${ain[@]}"} -filter_complex "$vf" -map '[v]' "${aout[@]}" \
     -sn -dn -map_metadata -1 \
